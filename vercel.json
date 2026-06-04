@@ -1,11 +1,5 @@
 {
-  "buildCommand": "prisma generate && next build",
+  "buildCommand": "prisma generate && prisma db push && node prisma/seed.js && next build",
   "framework": "nextjs",
-  "regions": ["sin1"],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "OPENROUTER_API_KEY": "@openrouter_api_key",
-    "ADMIN_PASSWORD": "@admin_password",
-    "ADMIN_SECRET_KEY": "@admin_secret_key"
-  }
+  "regions": ["sin1"]
 }
