@@ -1,0 +1,82 @@
+// prisma/schema.prisma
+// Faceless AI Insurance Agent - Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String?
+  email        String?        @unique
+  phone        String?
+  language     String         @default("en") // "en" | "si" | "ta"
+  role         String         @default("customer") // "customer" | "admin"
+  createdAt    DateTime       @default(now())
+  messages     ChatMessage[]
+  requests     QuotationRequest[]
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String?
+  sessionId String   // anonymous session support
+  message   String
+  role      String   // "user" | "assistant"
+  language  String   @default("en")
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Company {
+  id         String      @id @default(cuid())
+  name       String
+  logo       String?
+  website    String?
+  createdAt  DateTime    @default(now())
+  quotations Quotation[]
+}
+
+model Quotation {
+  id          String   @id @default(cuid())
+  companyId   String
+  planName    String
+  pdfUrl      String?
+  pdfText     String?  // extracted text for AI to read
+  premium     Float?
+  coverage    Float?
+  description String?
+  createdAt   DateTime @default(now())
+  company     Company  @relation(fields: [companyId], references: [id])
+}
+
+model QuotationRequest {
+  id           String   @id @default(cuid())
+  userId       String?
+  sessionId    String?
+  age          Int?
+  incomeRange  String?
+  dependents   Int?
+  budget       String?
+  coverageType String?  // life, health, vehicle, property
+  notes        String?
+  status       String   @default("pending") // pending | reviewed | quoted | closed
+  createdAt    DateTime @default(now())
+  user         User?    @relation(fields: [userId], references: [id])
+}
+
+model Settings {
+  id               String  @id @default("singleton")
+  openRouterApiKey String?
+  systemPrompt     String?
+  agentName        String  @default("Aisha")
+  agentAvatar      String? // emoji or image url
+  welcomeMessage   String?
+  whatsappNumber   String?
+}
